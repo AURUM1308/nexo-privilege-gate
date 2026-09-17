@@ -1643,7 +1643,7 @@
       }
 
 
-      const matches =
+      let matches =
         policies.filter(
           policy =>
             policy.patterns.some(
@@ -1651,7 +1651,50 @@
                 pattern.test(raw)
             )
         );
+const financialVerb =
+  /\b(send|spend|pay|give|tip|wire|transfer|charge|purchase|buy|order|donate|subscribe)\b/i;
 
+const moneyExpression =
+  /(?:[$€£]\s*\d+(?:[.,]\d{1,2})?|\b\d+(?:[.,]\d{1,2})?\s*(?:usd|cop|eur|gbp|dollars?|bucks?|pesos?|euros?|pounds?|cash)\b|\b(?:usd|cop|eur|gbp)\s*\d+(?:[.,]\d{1,2})?)/i;
+
+const alreadyFinancial =
+  matches.some(
+    item =>
+      item.id === "PG-FIN-001"
+  );
+
+if (
+  financialVerb.test(raw)
+  &&
+  moneyExpression.test(raw)
+  &&
+  !alreadyFinancial
+) {
+
+  matches.push({
+
+    id:
+      "PG-FIN-001",
+
+    risk:
+      82,
+
+    decision:
+      "HUMAN APPROVAL REQUIRED",
+
+    category:
+      "Financial action",
+
+    reason:
+      (
+        "A money-related action was detected. "
+        + "Financial operations require explicit "
+        + "human authorization."
+      )
+
+  });
+
+}
 
       let result;
 
