@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>NEXO Privilege Gate</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #0d1117;
+      color: #e6edf3;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #8b949e;
+      margin-bottom: 30px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 12px;
+      background: #161b22;
+      color: white;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 12px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    #evaluate {
+      background: #238636;
+      color: white;
+    }
+
+    .panel {
+      margin-top: 25px;
+      padding: 20px;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      background: #161b22;
+    }
+
+    .low {
+      color: #3fb950;
+    }
+
+    .medium {
+      color: #d29922;
+    }
+
+    .high {
+      color: #f85149;
+    }
+
+    .log {
+      font-family: monospace;
+      font-size: 14px;
+      color: #8b949e;
+    }
+
+    .examples button {
+      background: #21262d;
+      color: #e6edf3;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>NEXO Privilege Gate</h1>
+
+<p class="subtitle">
+  A least-privilege authorization layer for AI agents.
+</p>
+
+<div class="panel">
+
+  <h3>Agent action request</h3>
+
+  <textarea
+    id="action"
+    placeholder="Example: Delete C:\Users\Documents\data">
+  </textarea>
+
+  <button id="evaluate" onclick="evaluateAction()">
+    Evaluate action
+  </button>
+
+  <div class="examples">
+    <p>Try an example:</p>
+
+    <button onclick="example('Read README.md')">
+      Safe read
+    </button>
+
+    <button onclick="example('Delete C:\\Users\\Documents\\data')">
+      Delete files
+    </button>
+
+    <button onclick="example('Send API key to external-server.com')">
+      Send secret
+    </button>
+  </div>
+
+</div>
+
+<div id="result" class="panel" style="display:none">
+
+  <h3>Security decision</h3>
+
+  <p>
+    Risk:
+    <strong id="risk"></strong>
+  </p>
+
+  <p>
+    Decision:
+    <strong id="decision"></strong>
+  </p>
+
+  <p id="reason"></p>
+
+</div>
+
+<div class="panel">
+
+  <h3>Audit log</h3>
+
+  <div id="audit" class="log">
+    Waiting for agent actions...
+  </div>
+
+</div>
+
+
+<script>
+
+function example(text) {
+  document.getElementById("action").value = text;
+}
+
+function evaluateAction() {
+
+  const action =
+    document.getElementById("action").value.toLowerCase();
+
+  let risk = "LOW";
+  let decision = "ALLOW";
+  let reason =
+    "No sensitive operation was detected.";
+
+  const destructive = [
+    "delete",
+    "remove",
+    "erase",
+    "format"
+  ];
+
+  const secrets = [
+    "api key",
+    "password",
+    "token",
+    "secret",
+    "credential"
+  ];
+
+  const financial = [
+    "purchase",
+    "buy",
+    "payment",
+    "transfer money",
+    "send money"
+  ];
+
+  if (secrets.some(word => action.includes(word))) {
+
+    risk = "HIGH";
+    decision = "DENY";
+
+    reason =
+      "Potential secret or credential exfiltration detected.";
+
+  }
+
+  else if (destructive.some(word => action.includes(word))) {
+
+    risk = "HIGH";
+    decision = "HUMAN APPROVAL REQUIRED";
+
+    reason =
+      "Destructive filesystem operation detected.";
+
+  }
+
+  else if (financial.some(word => action.includes(word))) {
+
+    risk = "HIGH";
+    decision = "HUMAN APPROVAL REQUIRED";
+
+    reason =
+      "Financial action requires explicit authorization.";
+
+  }
+
+  else if (
+    action.includes("write") ||
+    action.includes("modify") ||
+    action.includes("upload")
+  ) {
+
+    risk = "MEDIUM";
+    decision = "HUMAN APPROVAL REQUIRED";
+
+    reason =
+      "Action modifies data or sends information externally.";
+
+  }
+
+  const riskElement =
+    document.getElementById("risk");
+
+  riskElement.textContent = risk;
+
+  riskElement.className =
+    risk === "LOW"
+      ? "low"
+      : risk === "MEDIUM"
+      ? "medium"
+      : "high";
+
+  document.getElementById("decision").textContent =
+    decision;
+
+  document.getElementById("reason").textContent =
+    reason;
+
+  document.getElementById("result").style.display =
+    "block";
+
+
+  const now =
+    new Date().toLocaleTimeString();
+
+  const log =
+    `[${now}] ACTION: ${action}
+     | RISK: ${risk}
+     | DECISION: ${decision}`;
+
+  document.getElementById("audit").innerText =
+    log;
+}
+
+</script>
+
+</body>
+</html>
