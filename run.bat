@@ -11,26 +11,42 @@ echo  NEXO Privilege Gate v0.4
 echo ==============================================
 echo.
 
-where python >nul 2>nul
+REM ------------------------------------------------
+REM Find a real Python interpreter
+REM ------------------------------------------------
 
-if errorlevel 1 (
-    echo [ERROR] Python was not found.
-    echo.
-    echo Install Python 3.11 or newer and make sure
-    echo "Add Python to PATH" is enabled.
-    echo.
-    pause
-    exit /b 1
+set "PYTHON_CMD="
+
+py --version >nul 2>&1
+if not errorlevel 1 (
+    set "PYTHON_CMD=py"
+    goto :python_found
 )
 
+python --version >nul 2>&1
+if not errorlevel 1 (
+    set "PYTHON_CMD=python"
+    goto :python_found
+)
+
+echo [ERROR] A working Python installation was not found.
+echo.
+echo Install Python 3.11 or newer.
+echo.
+pause
+exit /b 1
+
+
+:python_found
+
 echo [1/3] Checking Python...
-python --version
+%PYTHON_CMD% --version
 
 echo.
 echo [2/3] Running security regression tests...
 echo.
 
-python -m unittest discover -s tests -p "test_*.py" -v
+%PYTHON_CMD% -m unittest discover -s tests -p "test_*.py" -v
 
 if errorlevel 1 (
     echo.
@@ -59,7 +75,7 @@ echo.
 echo Press Ctrl+C to stop NEXO.
 echo.
 
-python server.py
+%PYTHON_CMD% server.py
 
 echo.
 echo NEXO stopped.
