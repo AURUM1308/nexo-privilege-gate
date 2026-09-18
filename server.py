@@ -1426,8 +1426,12 @@ open the <code>Human control URL</code> printed there.
 
         try:
 
-            filesystem.resolve(
-                path
+            # Evaluate and retain the same canonical path used by execution.
+            # Otherwise aliases such as '.env/.' can bypass secret-file policy.
+            path = filesystem.relative(
+                filesystem.resolve(
+                    path
+                )
             )
 
         except Exception as exc:
