@@ -216,3 +216,46 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# ============================================================
+# NEXO Privilege Gate
+# ============================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE / editor
+.vscode/
+.idea/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# ============================================================
+# NEXO LOCAL SECURITY STATE
+# NEVER COMMIT THESE FILES
+# ============================================================
+
+.nexo_state/
+sandbox_data/
+
+# Explicit sensitive runtime files
+*.token
+*.key
+
+# Temporary files
+*.tmp
+.nexo_tmp_*
+
+# Logs
+*.log
